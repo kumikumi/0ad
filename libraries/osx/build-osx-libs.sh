@@ -24,7 +24,7 @@ ZLIB_VERSION="zlib-1.2.11"
 CURL_VERSION="curl-7.71.0"
 ICONV_VERSION="libiconv-1.16"
 XML2_VERSION="libxml2-2.9.10"
-SDL2_VERSION="SDL2-2.0.12"
+SDL2_VERSION="SDL2-2.0.18"
 # NOTE: remember to also update LIB_URL below when changing version
 BOOST_VERSION="boost_1_76_0"
 # NOTE: remember to also update LIB_URL below when changing version
@@ -35,7 +35,7 @@ PNG_VERSION="libpng-1.6.36"
 OGG_VERSION="libogg-1.3.3"
 VORBIS_VERSION="libvorbis-1.3.7"
 # gloox requires GnuTLS, GnuTLS requires Nettle and GMP
-GMP_VERSION="gmp-6.2.0"
+GMP_VERSION="gmp-6.2.1"
 NETTLE_VERSION="nettle-3.6"
 # NOTE: remember to also update LIB_URL below when changing version
 GLOOX_VERSION="gloox-1.0.24"
@@ -139,7 +139,7 @@ echo -e "Building zlib..."
 LIB_VERSION="${ZLIB_VERSION}"
 LIB_ARCHIVE="$LIB_VERSION.tar.gz"
 LIB_DIRECTORY=$LIB_VERSION
-LIB_URL="http://zlib.net/"
+LIB_URL="https://zlib.net/fossils/"
 
 mkdir -p zlib
 pushd zlib > /dev/null

@@ -2,6 +2,35 @@
 # Apply patches if needed
 # This script gets called from build.sh.
 
+# SM78 fails to create virtual envs on macs with python > 3.7
+# Unfortunately, 3.7 is mostly unavailable on ARM macs.
+# Therefore, replace the custom script with a more up-to-date version from pip
+# if python is detected to be newer than 3.7.
+if [ "$(uname -s)" = "Darwin" ];
+then
+    # SM actually uses features from the full-fledged virtualenv package
+    # and not just venv, so install it to be safe.
+    # Install it locally to not pollute anything.
+    # Install specifically a version that's know to work.
+    pip3 install --upgrade -t virtualenv 'virtualenv==20.13.1' --force-reinstall
+    export PYTHONPATH="$(pwd)/virtualenv:$PYTHONPATH"
+
+    PYTHON_MINOR_VERSION="$(python3 -c 'import sys; print(sys.version_info.minor)')"
+    if [ "$PYTHON_MINOR_VERSION" -gt 9 ];
+    then
+        # In python 3.10 `sysconfig._get_default_scheme()` was renamed to
+        # `sysconfig.get_default_scheme()`. This breaks the version of
+        # `virtualenv` bundled with the spidermonkey source code.
+        #
+        # It is assumed that the updated version fetched for macOS systems
+        # above does not have this problem.
+        patch -p1 < ../FixVirtualenvForPython310.diff
+    elif [ "$PYTHON_MINOR_VERSION" -gt 7 ];
+    then
+        patch -p1 < ../FixVirtualEnv.diff
+    fi
+fi
+
 # Mozglue symbols need to be linked against static builds.
 # https://bugzilla.mozilla.org/show_bug.cgi?id=1588340
 patch -p1 < ../FixMozglue.diff
@@ -33,6 +62,11 @@ patch -p1 < ../FixMSVCRootedVoid.diff
 # Upstream has changed this to 10.11 at the moment,
 # so this patches it to an arbitrarily high Mac OS 11
 patch -p1 < ../FixMacBuild.diff
+
+# In python 3.3, the Collections' Abstract Base Classes were moved from `collections` to
+# `collections.abc`, and aliases were set up for backwards compatibility.
+# In python 3.10, these aliases were removed, requiring all code that used them to update.
+patch -p1 < ../FixPythonCollectionABC.diff
 
 # Fix FP access breaking compilation on RPI3+
 # https://bugzilla.mozilla.org/show_bug.cgi?id=1526653
