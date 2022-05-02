@@ -49,9 +49,6 @@ fi
 
 if [ "`uname -s`" = "Darwin" ]
 then
-  # Explicitly target x86_64.
-  CONF_OPTS="${CONF_OPTS} --target=x86_64-apple-darwin"
-
   # Link to custom-built zlib
   export PKG_CONFIG_PATH="=${ZLIB_DIR}:${PKG_CONFIG_PATH}"
   CONF_OPTS="${CONF_OPTS} --with-system-zlib"

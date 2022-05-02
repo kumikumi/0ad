@@ -8,25 +8,27 @@
 # if python is detected to be newer than 3.7.
 if [ "$(uname -s)" = "Darwin" ];
 then
+    # SM actually uses features from the full-fledged virtualenv package
+    # and not just venv, so install it to be safe.
+    # Install it locally to not pollute anything.
+    # Install specifically a version that's know to work.
+    pip3 install --upgrade -t virtualenv 'virtualenv==20.13.1' --force-reinstall
+    export PYTHONPATH="$(pwd)/virtualenv:$PYTHONPATH"
+
     PYTHON_MINOR_VERSION="$(python3 -c 'import sys; print(sys.version_info.minor)')"
-    if [ "$PYTHON_MINOR_VERSION" -gt 7 ];
+    if [ "$PYTHON_MINOR_VERSION" -gt 9 ];
     then
-        # SM actually uses features from the full-fledged virtualenv package
-        # and not just venv, so install it to be safe.
-        # Install it locally to not pollute anything.
-        # Install specifically a version that's know to work.
-        pip3 install --upgrade -t virtualenv 'virtualenv==20.13.1'
-        export PYTHONPATH="$(pwd)/virtualenv:$PYTHONPATH"
+        # In python 3.10 `sysconfig._get_default_scheme()` was renamed to
+        # `sysconfig.get_default_scheme()`. This breaks the version of
+        # `virtualenv` bundled with the spidermonkey source code.
+        #
+        # It is assumed that the updated version fetched for macOS systems
+        # above does not have this problem.
+        patch -p1 < ../FixVirtualenvForPython310.diff
+    elif [ "$PYTHON_MINOR_VERSION" -gt 7 ];
+    then
         patch -p1 < ../FixVirtualEnv.diff
     fi
-else
-    # In python 3.10 `sysconfig._get_default_scheme()` was renamed to
-    # `sysconfig.get_default_scheme()`. This breaks the version of
-    # `virtualenv` bundled with the spidermonkey source code.
-    #
-    # It is assumed that the updated version fetched for macOS systems
-    # above does not have this problem.
-    patch -p1 < ../FixVirtualenvForPython310.diff
 fi
 
 # Mozglue symbols need to be linked against static builds.
